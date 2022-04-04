@@ -32,7 +32,7 @@ class DISTANACell(nn.Module):
             out_channels=lat_channels,
             kernel_size=3,
             stride=1,
-            padding=1,
+            padding=2, ### Changed to 2 in order to be able to feed BC's explicitly (it was 1 before)
             bias=bias
         ).to(device=device)
 
@@ -42,7 +42,7 @@ class DISTANACell(nn.Module):
             out_channels=hidden_channels,
             kernel_size=3,
             stride=1,
-            padding=1,
+            padding=0, ### Changed to 0 in order to be able to feed BC's explicitly (it was 1 before)
             bias=bias
         ).to(device=device)
 
@@ -119,7 +119,7 @@ class DISTANA(nn.Module):
     DISTANA class to model the 1D Burgers equation, the two 1D diffusion
     sorption equations or the 2d diffusion reaction equations.
     """
-    def __init__(self, config, device):
+    def __init__(self, config, device, bc):
         """
         Constructor
         """
@@ -139,6 +139,8 @@ class DISTANA(nn.Module):
                 device=device
             )
             self.layers.append(layer)
+        
+        self.bc = bc
 
     def forward(self, input_tensor, cur_state_list=None):
         """
@@ -146,6 +148,8 @@ class DISTANA(nn.Module):
         """
 
         next_state_list = []
+        
+        input_tensor = th.cat((self.bc[:,:,:1],input_tensor,self.bc[:,:,1:]),dim=2)
 
         for layer_idx, layer in enumerate(self.layers):
             dyn_out = layer.forward(

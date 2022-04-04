@@ -12,10 +12,10 @@ import test
 # Parameters
 
 TRAIN = False
-MODEL_NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+MODEL_NUMBERS = [0, 1, 2, 3, 4]
 
 # Number of models that can be trained in parallel
-POOLSIZE = 5
+POOLSIZE = 1
 
 
 #
@@ -33,14 +33,17 @@ if TRAIN:
 			pool.starmap(train.run_training, arguments)
 	else:
 		for model_number in MODEL_NUMBERS:
-			train.run_training(print_progress=False, model_number=model_number)
+			train.run_training(print_progress=True, model_number=model_number)
 
 else:
 	# Test the MODEL_NUMBERS iteratively
 	error_list = list()
+	BC_list = list()
 	for model_number in MODEL_NUMBERS:
-		mse = test.run_testing(model_number=model_number)
+		mse, inferred_BC = test.run_testing(print_progress=True, visualize=True, model_number=model_number)
 		error_list.append(mse)
+		BC_list.append(inferred_BC)
 
 	print(error_list)
+	print(BC_list)
 	print(f"Average MSE: {np.mean(error_list)}, STD: {np.std(error_list)}")
