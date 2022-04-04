@@ -16,6 +16,7 @@ from simulator import Simulator
 ##############
 
 TRAIN_DATA = True
+MINI_BATCHES = False
 
 #
 # Burger's specifications
@@ -23,10 +24,17 @@ DIFFUSION_COEFFICIENT = 0.01/np.pi
 
 if TRAIN_DATA:
     T_MAX = 2
-    T_STEPS = 401
+    T_STEPS = 256
+    LEFT_BC = 4.0
+    RIGHT_BC = -4.0
+    print("This is training data")
 else:
     T_MAX = 1
-    T_STEPS = 201
+    T_STEPS = 128
+    LEFT_BC = 4.0 #np.random.uniform(-1,1)
+    RIGHT_BC = -4.0 #np.random.uniform(-1,1)
+    print(LEFT_BC)
+    print(RIGHT_BC)
     
 X_LEFT = -1
 X_RIGHT = 1
@@ -39,14 +47,14 @@ DATAPOINTS_BOUNDARY = 50
 DATAPOINTS_COLLOCATION = 7500
 DATASET_NAME = "data"
 SAVE_DATA = True
-VISUALIZE_DATA = False
+VISUALIZE_DATA = True
 
 
 #############
 # FUNCTIONS #
 #############
 
-def generate_sample(simulator, visualize, save_data, root_path):
+def generate_sample(simulator, visualize, save_data, root_path, idx):
     """
     This function generates a data sample, visualizes it if desired and saves
     the data to file if desired.
@@ -54,6 +62,7 @@ def generate_sample(simulator, visualize, save_data, root_path):
     :param visualize: Boolean indicating whether to visualize the data
     :param save_data: Boolean indicating whether to write the data to file
     :param root_path: The root path of this script
+    :param idx: Index for creating different sequences
     """
     
     print("Generating data...")
@@ -84,6 +93,7 @@ def generate_sample(simulator, visualize, save_data, root_path):
                 root_path=root_path,
                 simulator=simulator,
                 sample=sample,
+                idx=idx
             )
         
             # List for tuples as train/val/test data
@@ -145,7 +155,8 @@ def generate_sample(simulator, visualize, save_data, root_path):
             write_data_to_file(
                 root_path=root_path,
                 simulator=simulator,
-                sample=sample
+                sample=sample,
+                idx=42 #it is a dummy number
             )
         
 
@@ -184,12 +195,13 @@ def draw_indices(simulator, n_init, n_bound, n_colloc):
     return idcs_init, idcs_bound
 
 
-def write_data_to_file(root_path, simulator, sample):
+def write_data_to_file(root_path, simulator, sample, idx):
     """
     Writes the given data to the according directory in .npy format.
     :param root_path: The root_path of the script
     :param simulator: The simulator that created the data
     :param sample: The sample to be written to file
+    :param idx: Index for creating different sequences
     """
     
     if TRAIN_DATA:
@@ -199,11 +211,21 @@ def write_data_to_file(root_path, simulator, sample):
         os.makedirs(data_path, exist_ok=True)
         
         # Write the t- and x-series data along with the sample to file
-        np.save(file=os.path.join(data_path, "t_series.npy"),
-                arr=simulator.t[:len(simulator.t)//2 + 1])
+        if MINI_BATCHES:
+            np.save(file=os.path.join(data_path, "t_series_mini_batches.npy"),
+                arr=simulator.t[:len(simulator.t)])
+            
+            np.save(file=os.path.join(data_path, f"sample_{str(idx).zfill(2)}.npy"),
+                    arr=sample[:len(simulator.t)])
+        
+        else:
+            np.save(file=os.path.join(data_path, "t_series.npy"),
+                    arr=simulator.t[:len(simulator.t)])
+            
+            np.save(file=os.path.join(data_path, "sample.npy"),
+                    arr=sample[:len(simulator.t)])
+            
         np.save(file=os.path.join(data_path, "x_series.npy"), arr=simulator.x)
-        np.save(file=os.path.join(data_path, "sample.npy"),
-                arr=sample[:len(simulator.t)//2 + 1])
             
         # Create the data directory for the extrapolation data if it does not yet exist
         data_path = os.path.join(root_path, DATASET_NAME+"_ext")
@@ -282,7 +304,7 @@ def create_data_tuple_colloc(simulator, sample):
     t, x = np.meshgrid(t,x)
     
     pair = np.hstack((t.flatten()[:,None],x.flatten()[:,None]))
-    idx = np.random.choice(len(pair), DATAPOINTS_COLLOCATION , replace=False)
+    idx = np.random.choice(len(pair), DATAPOINTS_COLLOCATION , replace=True)
     
     t_idx = pair[idx,0]
     x_idx = pair[idx,1]
@@ -340,7 +362,7 @@ def visualize_sample(sample, simulator, idcs_init=None, idcs_bound=None):
     ax[1].set_xlabel('$x$')
     ax[1].set_ylabel('$u(t,x)$')    
     ax[1].set_xlim([simulator.x.min(), simulator.x.max()])
-    ax[1].set_ylim([-1.1, 1.1])
+    ax[1].set_ylim([-5.1, 5.1])
 
     anim = animation.FuncAnimation(fig,
                                    animate,
@@ -371,25 +393,69 @@ def main():
 
     # Determine the root path for this script and set up a path for the data
     root_path = os.path.abspath("")
-
+    
     # Create a wave generator using the parameters from the configuration file
-    simulator = Simulator(
-        diffusion_coefficient=DIFFUSION_COEFFICIENT,
-        t_max=T_MAX,
-        t_steps=T_STEPS,
-        x_left=X_LEFT,
-        x_right=X_RIGHT,
-        x_steps=X_STEPS,
-        train_data=TRAIN_DATA
-    )
+    if not MINI_BATCHES:
+        simulator = Simulator(
+                diffusion_coefficient=DIFFUSION_COEFFICIENT,
+                left_BC=LEFT_BC,
+                right_BC=RIGHT_BC,
+                t_max=T_MAX,
+                t_steps=T_STEPS,
+                x_left=X_LEFT,
+                x_right=X_RIGHT,
+                x_steps=X_STEPS,
+                train_data=TRAIN_DATA
+            )
 
-    # Create train, validation and test data
-    generate_sample(simulator=simulator,
-                    visualize=VISUALIZE_DATA,
-                    save_data=SAVE_DATA,
-                    root_path=root_path
-                    )
+        # Create train, validation and test data
+        generate_sample(simulator=simulator,
+                        visualize=VISUALIZE_DATA,
+                        save_data=SAVE_DATA,
+                        root_path=root_path,
+                        idx=42 #it is a dummy number
+                        )
 
+    else:
+        batch_size = 10
+        save_left_BC = []
+        save_right_BC = []
+    
+        for idx in range(batch_size):
+            left_BC = np.random.uniform(-1,1)
+            right_BC = np.random.uniform(-1,1)
+            save_left_BC.append(left_BC)
+            save_right_BC.append(right_BC)
+            print(left_BC)
+            print(right_BC)
+            
+            simulator = Simulator(
+                diffusion_coefficient=DIFFUSION_COEFFICIENT,
+                left_BC=left_BC,
+                right_BC=right_BC,
+                t_max=T_MAX,
+                t_steps=T_STEPS,
+                x_left=X_LEFT,
+                x_right=X_RIGHT,
+                x_steps=X_STEPS,
+                train_data=TRAIN_DATA
+            )
+    
+            # Create train, validation and test data
+            generate_sample(simulator=simulator,
+                            visualize=VISUALIZE_DATA,
+                            save_data=SAVE_DATA,
+                            root_path=root_path,
+                            idx=idx
+                            )
+        name = "left_BC.npy"
+        data_path = os.path.join(root_path, DATASET_NAME+"_train")
+        np.save(file=os.path.join(data_path, name), arr=save_left_BC)
+        
+        name = "right_BC.npy"
+        data_path = os.path.join(root_path, DATASET_NAME+"_train")
+        np.save(file=os.path.join(data_path, name), arr=save_right_BC)
+        
 
 if __name__ == "__main__":
     main()

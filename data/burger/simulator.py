@@ -11,8 +11,8 @@ from scipy.integrate import solve_ivp
 
 class Simulator:
 
-    def __init__(self, diffusion_coefficient, t_max, t_steps, x_left, x_right,
-                 x_steps, train_data):
+    def __init__(self, diffusion_coefficient, left_BC, right_BC, t_max, t_steps,
+                 x_left, x_right, x_steps, train_data):
         """
         Constructor method initializing the parameters for the Burger's
         equation.
@@ -26,6 +26,9 @@ class Simulator:
 
         # Set class parameters
         self.D = diffusion_coefficient
+        
+        self.left_BC = left_BC
+        self.right_BC = right_BC
 
         self.T = t_max
         self.X0 = x_left
@@ -47,11 +50,16 @@ class Simulator:
         :return: The generated sample as numpy array(t, x)
         """
 
-        # Initialize the simulation field
-        if self.train_data:
-            u0 = -np.sin(np.pi*self.x)
-        else:
-            u0 = np.sin(np.pi*self.x)
+        #=======================================================================
+        # #Initialize the simulation field
+        # if self.train_data:
+        #     u0 = -np.sin(np.pi*self.x)
+        # else:
+        #     u0 = np.sin(np.pi*self.x)
+        #=======================================================================
+
+        # Sets the initial value the same for training and test set
+        u0 = -np.sin(np.pi*self.x)
 
         nx_minus_2 = np.diag(-2*np.ones(self.Nx-2), k=0)
         nx_minus_3 = np.diag(np.ones(self.Nx-3), k=-1)
@@ -81,9 +89,18 @@ class Simulator:
         a_plus = np.maximum(u,0)
         a_min = np.minimum(u,0)
         
-        u_left = np.concatenate((np.array([0]),u[:-1]))
-        u_right = np.concatenate((u[1:],np.array([0])))
+        # u_left = np.concatenate((np.array([0]),u[:-1]))
+        # u_right = np.concatenate((u[1:],np.array([0])))
+        
+        u_left = np.concatenate((np.array([self.left_BC]),u[:-1]))
+        u_right = np.concatenate((u[1:],np.array([self.right_BC])))
+        
+        q = np.zeros(self.Nx-2)
+       
+        # Calculate time derivative of each unknown
+        q[0]  = self.D/(self.dx**2)*self.left_BC
+        q[-1] = self.D/(self.dx**2)*self.right_BC
 
         # Return finite difference
         return self.D*np.matmul(self.lap, u) - (a_plus*(u - u_left)/self.dx + 
-                                                a_min*(u_right - u)/self.dx)
+                                                a_min*(u_right - u)/self.dx) + q
