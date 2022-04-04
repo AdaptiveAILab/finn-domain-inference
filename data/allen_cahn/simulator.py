@@ -1,5 +1,5 @@
 """
-This script provides a class solving the Burger's equation via numerical
+This script provides a class solving the Allen-Cahn equation via numerical
 integration using scipy's solve_ivp method. It can be used to generate data
 samples of the Burger's equation with Dirichlet boundary condition on both
 sides (u = 0).
@@ -11,7 +11,7 @@ from scipy.integrate import solve_ivp
 
 class Simulator:
 
-    def __init__(self, diffusion_coefficient, t_max, t_steps, x_left, x_right,
+    def __init__(self, diffusion_coefficient, left_BC, right_BC, t_max, t_steps, x_left, x_right,
                  x_steps, train_data):
         """
         Constructor method initializing the parameters for the Burger's
@@ -27,6 +27,9 @@ class Simulator:
         # Set class parameters
         self.D = diffusion_coefficient
 
+        self.left_BC = left_BC
+        self.right_BC = right_BC
+        
         self.T = t_max
         self.X0 = x_left
         self.X1 = x_right
@@ -47,11 +50,16 @@ class Simulator:
         :return: The generated sample as numpy array(t, x)
         """
 
-        # Initialize the simulation field
-        if self.train_data:
-            u0 = self.x**2 * np.cos(np.pi*self.x)
-        else:
-            u0 = np.sin(np.pi*self.x/2)
+        #=======================================================================
+        # # Initialize the simulation field
+        # if self.train_data:
+        #     u0 = (self.x**2 * np.cos(np.pi*self.x))
+        # else:
+        #     u0 = (np.sin(np.pi*self.x/2))
+        #=======================================================================
+            
+        # Sets the initial value the same for training and test set
+        u0 = (self.x**2 * np.cos(np.pi*self.x))
 
         nx_minus_2 = np.diag(-2*np.ones(self.Nx-2), k=0)
         nx_minus_3 = np.diag(np.ones(self.Nx-3), k=-1)
@@ -60,10 +68,12 @@ class Simulator:
         self.lap = nx_minus_2 + nx_minus_3 + nx_plus_3
         self.lap /= self.dx**2
         # Periodic BC
-        self.lap[0,-1] = 1/self.dx**2
-        self.lap[-1,0] = 1/self.dx**2
+        #=======================================================================
+        # self.lap[0,-1] = 1/self.dx**2
+        # self.lap[-1,0] = 1/self.dx**2
+        #=======================================================================
 
-        # Solve Burger's equation
+        # Solve Allen-Cahn equation
         prob = solve_ivp(self.rc_ode, (0, self.T), u0, t_eval=self.t)
         ode_data = prob.y
 
@@ -78,5 +88,12 @@ class Simulator:
         :param u: The equation values to solve
         :return: A finite difference solution
         """
+        # initialize q
+        q = np.zeros(self.Nx-2)
+        
+        # Calculate time derivative of each unknown
+        q[0]  = self.D/(self.dx**2)*self.left_BC
+        q[-1] = self.D/(self.dx**2)*self.right_BC
+        
         # Return finite difference
-        return self.D*np.matmul(self.lap, u) - 5*(u**3-u)
+        return self.D*np.matmul(self.lap, u) - 5*(u**3-u) + q
