@@ -3,24 +3,25 @@
 	},
 
 	"general": {
-		"device": "cuda"
+		"device": "cpu"
 	},
 
 	"training": {
-		"save_model": true,
+		"save_model": false,
 		"continue_training": false,
-		"epochs": 2001,
-		"learning_rate": 0.001
+		"epochs": 2501,
+		"learning_rate": 0.1,
+		"batch_size": 1
 	},
 
 	"data": {
-		"type": "allen_cahn",  // "burger", "diffusion_sorption", "diffusion_reaction"
+		"type": "allen_cahn",  // "burger", "diffusion_sorption", "diffusion_reaction", "allen_cahn"
 		"name": "data_test",  // "data_train", "data_ext", "data_test"
 		"noise": 0.0
 	},
 
 	"model": {
-		"name": "allen-cahn",  // "burger", "diff-sorp", "diff-react"
+		"name": "allen_cahn_mini",  // "burger", "diff-sorp", "diff-react"
 		"number": 0,  // The i-th model
 		"small" : 1  // 0 if original size, 1 if smaller network
 	}
