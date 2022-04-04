@@ -11,11 +11,12 @@ import os
 import time
 from threading import Thread
 import sys
+import matplotlib.pyplot as plt
 
 sys.path.append("..")
 from utils.configuration import Configuration
 import utils.helper_functions as helpers
-from finn import FINN_Burger, FINN_DiffSorp, FINN_DiffReact, FINN_AllenCahn
+from finn import FINN_Burger, FINN_AllenCahn
 
 
 def run_training(print_progress=True, model_number=None):
@@ -48,84 +49,35 @@ def run_training(print_progress=True, model_number=None):
         # Load samples, together with x, y, and t series
         t = th.tensor(np.load(os.path.join(data_path, "t_series.npy")),
                       dtype=th.float).to(device=device)
-        x = np.load(os.path.join(data_path, "x_series.npy"))
-        u = th.tensor(np.load(os.path.join(data_path, "sample.npy")),
-                             dtype=th.float).to(device=device)
+        x = np.load(os.path.join(data_path, "x_series.npy"))## [5:45] # cut this maybe 5:45
+        
+        u = th.tensor(np.load(os.path.join(data_path, f"sample.npy")),
+                      dtype=th.float).to(device=device) #cut 5:45 check for the dimensions
         
         u[1:] = u[1:] + th.normal(th.zeros_like(u[1:]),th.ones_like(u[1:])*config.data.noise)
-        
+
         dx = x[1]-x[0]
     
         # Initialize and set up the model
         model = FINN_Burger(
             u = u,
-            D = np.array([1.0]),
-            BC = np.array([[0.0], [0.0]]),
+            D = np.array([0.01/np.pi/dx**2]),
+            BC = np.array([[0.0],[0.0]]),
             dx = dx,
             layer_sizes = config.model.layer_sizes,
             device = device,
             mode="train",
-            learn_coeff=True
+            learn_coeff=False,
+            learn_BC=True,
+            train_mini_batch=False
         ).to(device=device)
         
-    
-    elif config.data.type == "diffusion_sorption":
-        # Load samples, together with x, y, and t series
-        t = th.tensor(np.load(os.path.join(data_path, "t_series.npy")),
-                      dtype=th.float).to(device=device)
-        x = np.load(os.path.join(data_path, "x_series.npy"))
-        sample_c = th.tensor(np.load(os.path.join(data_path, "sample_c.npy")),
-                             dtype=th.float).to(device=device)
-        sample_ct = th.tensor(np.load(os.path.join(data_path, "sample_ct.npy")),
-                             dtype=th.float).to(device=device)
-        
-        dx = x[1]-x[0]
-        u = th.stack((sample_c, sample_ct), dim=len(sample_c.shape))
-        
-        u[1:] = u[1:] + th.normal(th.zeros_like(u[1:]),th.ones_like(u[1:])*config.data.noise)
-        
-        # Initialize and set up the model
-        model = FINN_DiffSorp(
-            u = u,
-            D = np.array([0.5, 0.1]),
-            BC = np.array([[1.0, 1.0], [0.0, 0.0]]),
-            dx = dx,
-            layer_sizes = config.model.layer_sizes,
-            device = device,
-            mode="train",
-            learn_coeff=True
-        ).to(device=device)
-    
-    elif config.data.type == "diffusion_reaction":
-        # Load samples, together with x, y, and t series
-        t = th.tensor(np.load(os.path.join(data_path, "t_series.npy")),
-                      dtype=th.float).to(device=device)
-        x = np.load(os.path.join(data_path, "x_series.npy"))
-        y = np.load(os.path.join(data_path, "y_series.npy"))
-        sample_u = th.tensor(np.load(os.path.join(data_path, "sample_u.npy")),
-                             dtype=th.float).to(device=device)
-        sample_v = th.tensor(np.load(os.path.join(data_path, "sample_v.npy")),
-                             dtype=th.float).to(device=device)
-        
-        dx = x[1]-x[0]
-        dy = y[1]-y[0]
-        
-        u = th.stack((sample_u, sample_v), dim=len(sample_u.shape))
-        u[1:] = u[1:] + th.normal(th.zeros_like(u[1:]),th.ones_like(u[1:])*config.data.noise)
-    
-        # Initialize and set up the model
-        model = FINN_DiffReact(
-            u = u,
-            D = np.array([5E-4/(dx**2), 1E-3/(dx**2)]),
-            BC = np.zeros((4,2)),
-            dx = dx,
-            dy = dy,
-            layer_sizes = config.model.layer_sizes,
-            device = device,
-            mode="train",
-            learn_coeff=True
-        ).to(device=device)
-    
+        if model.learn_BC:
+            # Cut the data before training
+            data_cut = 30
+            u = u[:data_cut,:]
+            t = t[:data_cut]
+            
     elif config.data.type == "allen_cahn":
         # Load samples, together with x, y, and t series
         t = th.tensor(np.load(os.path.join(data_path, "t_series.npy")),
@@ -141,14 +93,22 @@ def run_training(print_progress=True, model_number=None):
         # Initialize and set up the model
         model = FINN_AllenCahn(
             u = u,
-            D = np.array([0.6]),
+            D = np.array([0.005/dx**2]), # might set 2 or 3 if bc_learn=True
             BC = np.array([[0.0], [0.0]]),
             dx = dx,
             layer_sizes = config.model.layer_sizes,
             device = device,
             mode="train",
-            learn_coeff=True
+            learn_coeff=False,
+            learn_BC=True,
+            train_mini_batch=False
         ).to(device=device)
+        
+        if model.learn_BC:
+            # Cut the data before training
+            data_cut = 30
+            u = u[:data_cut,:]
+            t = t[:data_cut]
 
     # Count number of trainable parameters
     pytorch_total_params = sum(
@@ -174,17 +134,65 @@ def run_training(print_progress=True, model_number=None):
     optimizer = th.optim.LBFGS(model.parameters(),
                                 lr=config.training.learning_rate)
 
+    #criterion = nn.MSELoss(reduction="mean") ## This was used before
     criterion = nn.MSELoss(reduction="mean")
 
     #
     # Set up lists to save and store the epoch errors
     epoch_errors_train = []
     best_train = np.infty
-
+    
     """
     TRAINING
     """
 
+    if model.train_mini_batch:
+        
+        # Load boundary conditions of the mini-batches
+        left_BC = th.tensor(np.load(os.path.join(data_path, "left_BC.npy")),
+                                         dtype=th.float).to(device=device)
+        right_BC = th.tensor(np.load(os.path.join(data_path, "right_BC.npy")),
+                                         dtype=th.float).to(device=device)
+        
+        print(left_BC)
+        print(right_BC)
+                                         
+        # Load t series for mini-batch training
+        t = th.tensor(np.load(os.path.join(data_path, "t_series_mini_batches.npy")),
+                      dtype=th.float).to(device=device)
+        
+        shuffle = np.random.permutation(config.training.batch_size)
+        print(shuffle)
+        
+        for idx in np.arange(config.training.batch_size):
+              
+            data = th.tensor(np.load(os.path.join(data_path, f"sample_{str(shuffle[idx]).zfill(2)}.npy")),
+                                         dtype=th.float).to(device=device)
+              
+            if idx == 0:
+                u = data.unsqueeze(2)
+                  
+                BC = th.tensor([[left_BC[shuffle[idx]]], [right_BC[shuffle[idx]]]]).unsqueeze(0)
+            else:
+                u = th.cat((u, data.unsqueeze(2)), dim=2)
+                BC = th.cat((BC, th.tensor([[left_BC[shuffle[idx]]], [right_BC[shuffle[idx]]]]).unsqueeze(0)), dim=0)
+                 
+        model.BC = BC
+        print(model.BC)
+        print(model.BC.shape)
+        print(u.shape)
+        
+    
+    if model.learn_BC:
+        # Initialize lists to store
+        left_BC = []
+        right_BC = []
+        
+        left_BC_grad = []
+        right_BC_grad = []
+        
+        mse_train = []
+        
     a = time.time()
 
     #
@@ -205,17 +213,27 @@ def run_training(print_progress=True, model_number=None):
             optimizer.zero_grad()
 
             # Forward propagate and calculate loss function
+            
             u_hat = model(t=t, u=u)
 
             mse = criterion(u_hat, u)
             
             mse.backward()
             
-            print(mse.item())
-            print(model.D)
+            if model.learn_BC:
+                print(f"BC: {model.BC}")
+                left_BC.append(float(model.BC[0,0]))
+                right_BC.append(float(model.BC[1,0]))
+                
+                print(f"\n BC_grad: {model.BC.grad}")
+                left_BC_grad.append(float(model.BC.grad[0,0]))
+                right_BC_grad.append(float(model.BC.grad[1,0]))
+                
+                print(f"mse_train: {mse.item()}")
+                mse_train.append(float(mse))
                 
             return mse
-        
+            
         optimizer.step(closure)
             
         # Extract the MSE value from the closure function
@@ -230,7 +248,7 @@ def run_training(print_progress=True, model_number=None):
             best_train = epoch_errors_train[-1]
             # Save the model to file (if desired)
             if config.training.save_model:
-                # Start a separate thread to save the model
+                #Start a separate thread to save the model
                 thread = Thread(target=helpers.save_model_to_file(
                     model_src_path=os.path.abspath(""),
                     config=config,
@@ -239,7 +257,6 @@ def run_training(print_progress=True, model_number=None):
                     epoch_errors_valid=epoch_errors_train,
                     net=model))
                 thread.start()
-
 
         
         #
@@ -250,6 +267,42 @@ def run_training(print_progress=True, model_number=None):
     b = time.time()
     if print_progress:
         print('\nTraining took ' + str(np.round(b - a, 2)) + ' seconds.\n\n')
+    
+    if model.learn_BC:
+        # Plot the convergence of BC's and their gradients over epochs
+        fig, ax = plt.subplots(1, 2, figsize=(18, 7), sharex=True)
+        
+        ax[0].plot(left_BC, label='left BC', color="red")
+        ax[0].plot(right_BC, label='right BC', color="darkblue")
+        ax[0].legend(loc="best", fontsize=18)
+        ax[0].set_title("Convergence of the BC's", size=22)
+        ax[0].axhline(y=4.0, color='saddlebrown')
+        ax[0].axhline(y=-4.0, color='saddlebrown')
+        ax[0].grid(True)
+        
+        ax[1].plot(left_BC_grad, label='left BC gradient', color="red")
+        ax[1].plot(right_BC_grad, label='right BC gradient', color="darkblue")
+        ax[1].legend(loc="best", fontsize=18)
+        ax[1].set_title("Convergence of the Gradients of the BC's", size=22)
+        ax[1].grid(True)
+        
+        plt.tight_layout()
+        plt.draw()
+        #plt.show()
+        plt.savefig(f"{config.model.name}.pdf")
+        
+        # Plot the convergence of the error during inference
+        fig, ax = plt.subplots(1, figsize=(9, 7))
+        
+        ax.plot(mse_train, label='MSE During Training', color="red")
+        ax.legend(loc="best", fontsize=18)
+        ax.set_title("Convergence of the Error", size=22)
+        ax.grid(True)
+        
+        plt.tight_layout()
+        plt.draw()
+        #plt.show()
+        plt.savefig(f"{config.model.name}_error.pdf")
     
 
 if __name__ == "__main__":
