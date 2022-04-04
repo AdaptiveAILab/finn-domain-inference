@@ -21,6 +21,9 @@ from constrain_moments import K2M
 
 
 def run_training(print_progress=True, model_number=None):
+    
+    #decides if mini batch training or not
+    train_mini_batch = True
 
     # Load the user configurations
     config = Configuration("config.json")
@@ -55,20 +58,52 @@ def run_training(print_progress=True, model_number=None):
         n_layers_convcell = 3
 
     if config.data.type == "burger":
-        # Load samples
-        u = th.tensor(np.load(os.path.join(data_path, "sample.npy")),
-                             dtype=th.float).to(device=device)
         
-        u = u + th.normal(th.zeros_like(u),th.ones_like(u)*config.data.noise)
+        if train_mini_batch:
+            left_BC = th.tensor(np.load(os.path.join(data_path, "left_BC.npy")),
+                                         dtype=th.float).to(device=device)
+            right_BC = th.tensor(np.load(os.path.join(data_path, "right_BC.npy")),
+                                             dtype=th.float).to(device=device)
+                                             
+            print(left_BC)
+            print(right_BC)
+            
+            shuffle = np.random.permutation(config.training.batch_size)
+            print(shuffle)
+            
+            for idx in np.arange(config.training.batch_size):
+                u = th.tensor(np.load(os.path.join(data_path, f"sample_{str(shuffle[idx]).zfill(2)}.npy")),
+                                                 dtype=th.float).to(device=device)
+                if idx == 0:
+                    # input_tensor : torch.Size([batch_size, input_length, channels, cols, rows])
+                    sample_length = u.shape[0]
+                    input_tensor = u[:sample_length//2].unsqueeze(0).unsqueeze(-2).to(device=device)
+                    target_tensor = u[sample_length//2:].unsqueeze(0).unsqueeze(-2).to(device=device)
+                    
+                    bc = th.tensor([[[left_BC[shuffle[idx]], right_BC[shuffle[idx]]]]])
+                else:
+                    sample_length = u.shape[0]
+                    input_tensor = th.cat((input_tensor, u[:sample_length//2].unsqueeze(0).unsqueeze(-2)),dim=0).to(device=device)
+                    target_tensor = th.cat((target_tensor, u[sample_length//2:].unsqueeze(0).unsqueeze(-2)),dim=0).to(device=device)
+                    
+                    bc = th.cat((bc, th.tensor([[[left_BC[shuffle[idx]], right_BC[shuffle[idx]]]]])), dim=0)
+                print(input_tensor.shape)
+                print(target_tensor.shape)
+        else:
+            # Load samples
+            u = th.tensor(np.load(os.path.join(data_path, "sample.npy")),
+                                 dtype=th.float).to(device=device)
+             
+            u = u + th.normal(th.zeros_like(u),th.ones_like(u)*config.data.noise)
+             
+            bc = th.tensor([[[0.0, 0.0]]]).to(device)
+            print(u.shape)
+            
+            # input_tensor : torch.Size([batch_size, input_length, channels, cols, rows])
+            sample_length = u.shape[0]
+            input_tensor = u[:sample_length//2].unsqueeze(0).unsqueeze(-2).to(device=device)
+            target_tensor = u[sample_length//2:].unsqueeze(0).unsqueeze(-2).to(device=device)
         
-        bc = th.tensor([[[0.0, 0.0]]]).to(device)
-        
-        sample_length = u.shape[0]
-        input_tensor = u[:sample_length//2].unsqueeze(0).unsqueeze(-2).to(device=device)
-        target_tensor = u[sample_length//2:].unsqueeze(0).unsqueeze(-2).to(device=device)
-        
-        
-    
         # Initialize and set up the model
         phycell  =  PhyCell(input_shape=(input_tensor.shape[-1]//4+1),
                             input_dim=input_dim,
@@ -100,118 +135,51 @@ def run_training(print_progress=True, model_number=None):
             constraints[ind,i] = 1
             ind +=1
         
-    
-    elif config.data.type == "diffusion_sorption":
-        # Load samples
-        sample_c = th.tensor(np.load(os.path.join(data_path, "sample_c.npy")),
-                             dtype=th.float).to(device=device)
-        sample_ct = th.tensor(np.load(os.path.join(data_path, "sample_ct.npy")),
-                             dtype=th.float).to(device=device)
-        
-        u = th.stack((sample_c, sample_ct), dim=1)
-        
-        u = u + th.normal(th.zeros_like(u),th.ones_like(u)*config.data.noise)
-
-        sample_length = u.shape[0]
-        input_tensor = u[:sample_length//2].unsqueeze(0).to(device=device)
-        target_tensor = u[sample_length//2:].unsqueeze(0).to(device=device)
-        
-        bc = th.tensor([[[1.0, 0.0], [1.0, 0.0]]]).to(device)
-        
-        # Initialize and set up the model
-        phycell  =  PhyCell(input_shape=(input_tensor.shape[-1]//4+1),
-                            input_dim=input_dim,
-                            F_hidden_dims=[7],
-                            n_layers=1,
-                            kernel_size=7,
-                            device=device) 
-        
-        convcell =  ConvLSTM(input_shape=(input_tensor.shape[-1]//4+1),
-                             input_dim=input_dim,
-                             hidden_dims=hidden_dims,
-                             n_layers=n_layers_convcell,
-                             kernel_size=3,
-                             device=device)
-        
-        model  = EncoderRNN(phycell,
-                              convcell,
-                              input_channels=2,
-                              input_dim=(input_tensor.shape[-1],),
-                              _1d=True,
-                              bc=bc,
-                              device=device,
-                              sigmoid=True,
-                              small=config.model.small)
-        
-        constraints = th.zeros((7,7)).to(device)
-        ind = 0
-        for i in range(0,7):
-            constraints[ind,i] = 1
-            ind +=1  
-    
-    elif config.data.type == "diffusion_reaction":
-        # Load samples
-        sample_u = th.tensor(np.load(os.path.join(data_path, "sample_u.npy")),
-                             dtype=th.float).to(device=device)
-        sample_v = th.tensor(np.load(os.path.join(data_path, "sample_v.npy")),
-                             dtype=th.float).to(device=device)
-        
-        
-        u = th.stack((sample_u, sample_v), dim=1)
-        u = u + th.normal(th.zeros_like(u),th.ones_like(u)*config.data.noise)
-        
-        sample_length = u.shape[0]
-        input_tensor = u[:sample_length//2].unsqueeze(0).to(device=device)
-        target_tensor = u[sample_length//2:].unsqueeze(0).to(device=device)
-        
-        # Initialize and set up the model
-        bc = th.tensor([[[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]]]).to(device=device)
-
-        phycell  =  PhyCell(input_shape=(input_tensor.shape[-2]//4+1,
-                                         input_tensor.shape[-1]//4+1),
-                            input_dim=input_dim,
-                            F_hidden_dims=[49],
-                            n_layers=1,
-                            kernel_size=(7,7),
-                            device=device) 
-        
-        convcell =  ConvLSTM(input_shape=(input_tensor.shape[-2]//4+1,
-                                          input_tensor.shape[-1]//4+1),
-                             input_dim=input_dim, 
-                             hidden_dims=hidden_dims,
-                             n_layers=n_layers_convcell,
-                             kernel_size=(3,3),
-                             device=device)
-        
-        model  = EncoderRNN(phycell,
-                              convcell,
-                              input_channels=2,
-                              input_dim=(input_tensor.shape[-2],input_tensor.shape[-1]),
-                              _1d=False,
-                              bc=bc,
-                              device=device,
-                              sigmoid=False,
-                              small=config.model.small)
-        
-        constraints = th.zeros((49,7,7)).to(device)
-        ind = 0
-        for i in range(0,7):
-            for j in range(0,7):
-                constraints[ind,i,j] = 1
-                ind +=1
                 
     elif config.data.type == "allen_cahn":
-        # Load samples
-        u = th.tensor(np.load(os.path.join(data_path, "sample.npy")),
-                             dtype=th.float).to(device=device)
         
-        u = u + th.normal(th.zeros_like(u),th.ones_like(u)*config.data.noise)
-        
-        bc = th.tensor([[[0.0, 0.0]]]).to(device)
-        
-        sample_length = u.shape[0]
-        input_tensor = u[:sample_length//2].unsqueeze(0).unsqueeze(-2).to(device=device)
-        target_tensor = u[sample_length//2:].unsqueeze(0).unsqueeze(-2).to(device=device)
+        if train_mini_batch:
+            left_BC = th.tensor(np.load(os.path.join(data_path, "left_BC.npy")),
+                                         dtype=th.float).to(device=device)
+            right_BC = th.tensor(np.load(os.path.join(data_path, "right_BC.npy")),
+                                             dtype=th.float).to(device=device)
+                                             
+            print(left_BC)
+            print(right_BC)
+            
+            shuffle = np.random.permutation(config.training.batch_size)
+            print(shuffle)
+            
+            for idx in np.arange(config.training.batch_size):
+                u = th.tensor(np.load(os.path.join(data_path, f"sample_{str(shuffle[idx]).zfill(2)}.npy")),
+                                                 dtype=th.float).to(device=device)
+                if idx == 0:
+                    # input_tensor : torch.Size([batch_size, input_length, channels, cols, rows])
+                    sample_length = u.shape[0]
+                    input_tensor = u[:sample_length//2].unsqueeze(0).unsqueeze(-2).to(device=device)
+                    target_tensor = u[sample_length//2:].unsqueeze(0).unsqueeze(-2).to(device=device)
+                    
+                    bc = th.tensor([[[left_BC[shuffle[idx]], right_BC[shuffle[idx]]]]])
+                else:
+                    sample_length = u.shape[0]
+                    input_tensor = th.cat((input_tensor, u[:sample_length//2].unsqueeze(0).unsqueeze(-2)),dim=0).to(device=device)
+                    target_tensor = th.cat((target_tensor, u[sample_length//2:].unsqueeze(0).unsqueeze(-2)),dim=0).to(device=device)
+                    
+                    bc = th.cat((bc, th.tensor([[[left_BC[shuffle[idx]], right_BC[shuffle[idx]]]]])), dim=0)
+                print(input_tensor.shape)
+                print(target_tensor.shape)
+        else:
+            # Load samples
+            u = th.tensor(np.load(os.path.join(data_path, "sample.npy")),
+                                 dtype=th.float).to(device=device)
+            
+            u = u + th.normal(th.zeros_like(u),th.ones_like(u)*config.data.noise)
+            
+            bc = th.tensor([[[0.0, 0.0]]]).to(device)
+            
+            sample_length = u.shape[0]
+            input_tensor = u[:sample_length//2].unsqueeze(0).unsqueeze(-2).to(device=device)
+            target_tensor = u[sample_length//2:].unsqueeze(0).unsqueeze(-2).to(device=device)
         
         
     
@@ -247,23 +215,23 @@ def run_training(print_progress=True, model_number=None):
             ind +=1
     
     if print_progress:
-      print(phycell)
-      print(convcell)
-      print(model)
+        print(phycell)
+        print(convcell)
+        print(model)
         
-      # Count number of trainable parameters
-      pytorch_total_params = sum(
-          p.numel() for p in phycell.parameters() if p.requires_grad
-      )
-      print("PhyCell parameters:", pytorch_total_params)
-      pytorch_total_params = sum(
-          p.numel() for p in convcell.parameters() if p.requires_grad
-      )
-      print("ConvLSTM parameters:", pytorch_total_params)
-      pytorch_total_params = sum(
-          p.numel() for p in model.parameters() if p.requires_grad
-      )
-      print("Total trainable model parameters:", pytorch_total_params)
+        # Count number of trainable parameters
+        pytorch_total_params = sum(
+            p.numel() for p in phycell.parameters() if p.requires_grad
+        )
+        print("PhyCell parameters:", pytorch_total_params)
+        pytorch_total_params = sum(
+            p.numel() for p in convcell.parameters() if p.requires_grad
+        )
+        print("ConvLSTM parameters:", pytorch_total_params)
+        pytorch_total_params = sum(
+            p.numel() for p in model.parameters() if p.requires_grad
+        )
+        print("Total trainable model parameters:", pytorch_total_params)
 
     # If desired, restore the network by loading the weights saved in the .pt
     # file
@@ -293,7 +261,6 @@ def run_training(print_progress=True, model_number=None):
     """
 
     a = time.time()
-
     #
     # Start the training and iterate over all epochs
     for epoch in range(config.training.epochs):
@@ -313,6 +280,7 @@ def run_training(print_progress=True, model_number=None):
             mse = 0
             for ei in range(input_length-1): 
                 encoder_output, encoder_hidden, output_image,_,_ = model(input_tensor[:,ei], (ei==0) )
+
                 mse += criterion(output_image,input_tensor[:,ei+1])
         
             decoder_input = input_tensor[:,-1,:,:] # first decoder input = last image of input sequence
@@ -328,12 +296,14 @@ def run_training(print_progress=True, model_number=None):
                     decoder_input = output_image
         
             # Moment regularization  # encoder.phycell.cell_list[0].F.conv1.weight # size (nb_filters,in_channels,7,7)
-            k2m = K2M([7]).to(device)
-            for b in range(0,model.phycell.cell_list[0].input_dim):
-                filters = model.phycell.cell_list[0].F.conv1.weight[:,b,:] # (nb_filters,7,7)     
-                m = k2m(filters.double()) 
-                m  = m.float()   
-                mse += criterion(m, constraints) # constrains is a precomputed matrix   
+            #===============================================================
+            # k2m = K2M([7]).to(device)
+            # for b in range(0,model.phycell.cell_list[0].input_dim):
+            #     filters = model.phycell.cell_list[0].F.conv1.weight[:,b,:] # (nb_filters,7,7)     
+            #     m = k2m(filters.double()) 
+            #     m  = m.float()   
+            #     mse += criterion(m, constraints) # constrains is a precomputed matrix   
+            #===============================================================
             mse.backward()
             
             return mse / target_tensor.size(1)
@@ -362,7 +332,6 @@ def run_training(print_progress=True, model_number=None):
                     net=model))
                 thread.start()
 
-
         
         #
         # Print progress to the console
@@ -372,7 +341,6 @@ def run_training(print_progress=True, model_number=None):
     b = time.time()
     if print_progress:
       print('\nTraining took ' + str(np.round(b - a, 2)) + ' seconds.\n\n')
-
 
 if __name__ == "__main__":
     th.set_num_threads(1)

@@ -399,9 +399,8 @@ class EncoderRNN(torch.nn.Module):
     def forward(self, input, first_timestep=False, decoding=False):
         
         # Pad boundary conditions
-        
         if self._1d:
-            input = torch.cat((self.bc[:1,:,:1],input,self.bc[:1,:,1:]),dim=2)
+            input = torch.cat((self.bc[:,:,:1],input,self.bc[:,:,1:]),dim=2) #torch.cat((self.bc[:1,:,:1],input,self.bc[:1,:,1:]),dim=2)
         else:
             Nx = input.size(-2)
             input = torch.cat((self.bc[:1,:,:1].repeat(1,1,Nx).unsqueeze(-1),input,
