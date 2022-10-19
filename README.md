@@ -1,19 +1,30 @@
-# MSC-Horuz
-This is the repository for Cosku's master's thesis about inferring unknown conditions (such as the boundary condition) when modeling physical equations with FINN.
+# LabRotation-Horuz
+This is the repository for Coşku's lab rotation about inferring unknown boundary conditions when modeling spatio-temporal PDEs with FINN.
 
 
-## FInite volume Neural Network (FINN)
+## Finite volume Neural Network (FINN)
 
-This repository contains the PyTorch code for models, training, and testing, and Python code for data generation to conduct the experiments as reported in the work [Composing Partial Differential Equations with Physics-Aware Neural Networks](...)
+This repository contains the PyTorch code for models, training, testing, and Python code for data generation to conduct the experiments as reported in the work [Inferring Boundary Conditions in Finite Volume Neural Networks](...)
+
+# Abstract
+
+Abstract. When modeling physical processes in spatially confined domains, the boundaries require distinct consideration through specifying appropriate boundary conditions (BCs). The finite volume neural network (FINN) is an exception among recent physics-aware neural network models: it allows the specification of arbitrary BCs. FINN is even able to generalize to modified BCs not seen during training, but requires them to be known during prediction. However, so far even FINN was not able to handle unknown BC values. Here, we extend FINN in order to infer BC values on-the-fly. This allows us to apply FINN in situations, where the BC values, such as the inflow rate of fluid into a simulated medium, is unknown. Experiments validate FINN’s ability to not only infer the correct values, but also to model the approximated Burgers’ and Allen- Cahn equations with higher accuracy compared to competitive pure ML and physics-aware ML models. Moreover, FINN generalizes well beyond the BC value range encountered during training, even when trained on only one fixed set of BC values. Our findings emphasize FINN’s ability
+to reveal unknown relationships from data, thus offering itself as a process-explaining system.
+
+`Keywords:` Physics-aware neural networks · Boundary conditions · Retrospective inference · Partial differential equations · Inductive biases.
 
 If you find this repository helpful, please cite our work:
 
 ```
-@article{...,
-	author    = {...},
-	title     = {Composing Partial Differential Equations with Physics-Aware Neural Networks},
-	journal   = {...},
-	year      = {...},
+@InProceedings{Horuz2022,
+    author    = {Coşku Can Horuz and Matthias Karlbauer and Timothy Praditia and Martin V. Butz and Sergey Oladyshkin and Wolfgang Nowak and Sebastian Otte},
+    booktitle = {International Conference on Artificial Neural Networks (ICANN)},
+    title     = {Inferring Boundary Conditions in Finite Volume Neural Networks},
+    year      = {2022},
+    publisher = {Springer Nature Switzerland},
+    isbn      = {978-3-031-15919-0},
+    pages     = {538--549},
+    groups    = {confpeer}
 }
 ```
 
@@ -28,37 +39,13 @@ We recommend setting up an (e.g. [conda](https://docs.conda.io/projects/conda/en
 
 ### Models & Experiments
 
-The code of the different pure machine learning models (TCN, ConvLSTM, DISTANA) and physics-aware models (PINN, PhyDNet, FINN) can be found in the `models` directory.
+The code of the pure machine learning model DISTANA and physics-aware models (PhyDNet and FINN) can be found in the `models` directory.
 
-Each model directory contains a `config.json` file to specify model parameters, data, etc. Please modify the sections in the respective `config.json` files as detailed below (further information about data and model architectures is reported in the according data sections of the paper's appendices):
-
-```
-"training": {
-	"t_stop": 150  // burger 150, diff-sorp 400, diff-react 70
-},
-
-"validation": {
-	"t_start": 150,  // burger 150, diff-sorp 400, diff-react 70
-	"t_stop": 200  // burger 200, diff-sorp 500, diff-react 100
-},
-
-"data": {
-	"type": "burger",  // "burger", "diffusion_sorption", "diffusion_reaction"
-	"name": "data_ext",  // "data_train", "data_ext", "data_test"
-}
-
-"model": {
-  	"name": "burger"  // "burger", "diff-sorp", "diff-react"
-	"field_size": [49],  // burger [49], diff-sorp [26], fhn [49, 49]
-	... other settings to be specified according to the model architectures section in the paper's appendix
-}
-```
+Each model directory contains a `config.json` file to specify model parameters, data, etc. Please modify the sections in the respective `config.json` files.
 
 
 The actual models can be trained and tested by calling the according `python train.py` or `python test.py` scripts. Alternatively, `python experiment.py` can be used to either train or test n models (please consider the settings in the `experiment.py` script).
 
 ### Data generation
 
-The Python scripts to generate the burger, diffusion-sorption, and diffusion-reaction data can be found in the `data` directory.
-
-In each of the `burger`, `diffusion_sorption`, and `diffusion_reaction` directories, a `data_generation.py` and `simulator.py` script can be found. The former is used to generate train, extrapolation (ext), or test data. For details about the according data generation settings of each dataset, please refer to the corresponding data sections in the paper's appendices.
+The Python scripts to generate the burger and allen-cahn data can be found in the `data` directory. In each of these directories, a `data_generation.py` and `simulator.py` script can be found. The former is used to generate train, extrapolation (ext), or test data. For details about the according data generation settings of each dataset, please refer to the corresponding data sections in the paper.
