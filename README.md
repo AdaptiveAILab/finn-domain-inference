@@ -1,14 +1,11 @@
 # LabRotation-Horuz
 This is the repository for Coşku's lab rotation about inferring unknown boundary conditions when modeling spatio-temporal PDEs with FINN.
 
+This repository contains the PyTorch code for models, training, testing, and Python code for data generation to conduct the experiments as reported in the work [Inferring Boundary Conditions in Finite Volume Neural Networks](https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45)
 
-## Finite volume Neural Network (FINN)
+### Abstract
 
-This repository contains the PyTorch code for models, training, testing, and Python code for data generation to conduct the experiments as reported in the work [Inferring Boundary Conditions in Finite Volume Neural Networks](...)
-
-# Abstract
-
-Abstract. When modeling physical processes in spatially confined domains, the boundaries require distinct consideration through specifying appropriate boundary conditions (BCs). The finite volume neural network (FINN) is an exception among recent physics-aware neural network models: it allows the specification of arbitrary BCs. FINN is even able to generalize to modified BCs not seen during training, but requires them to be known during prediction. However, so far even FINN was not able to handle unknown BC values. Here, we extend FINN in order to infer BC values on-the-fly. This allows us to apply FINN in situations, where the BC values, such as the inflow rate of fluid into a simulated medium, is unknown. Experiments validate FINN’s ability to not only infer the correct values, but also to model the approximated Burgers’ and Allen- Cahn equations with higher accuracy compared to competitive pure ML and physics-aware ML models. Moreover, FINN generalizes well beyond the BC value range encountered during training, even when trained on only one fixed set of BC values. Our findings emphasize FINN’s ability
+When modeling physical processes in spatially confined domains, the boundaries require distinct consideration through specifying appropriate boundary conditions (BCs). The finite volume neural network (FINN) is an exception among recent physics-aware neural network models: it allows the specification of arbitrary BCs. FINN is even able to generalize to modified BCs not seen during training, but requires them to be known during prediction. However, so far even FINN was not able to handle unknown BC values. Here, we extend FINN in order to infer BC values on-the-fly. This allows us to apply FINN in situations, where the BC values, such as the inflow rate of fluid into a simulated medium, is unknown. Experiments validate FINN’s ability to not only infer the correct values, but also to model the approximated Burgers’ and Allen-Cahn equations with higher accuracy compared to competitive pure ML and physics-aware ML models. Moreover, FINN generalizes well beyond the BC value range encountered during training, even when trained on only one fixed set of BC values. Our findings emphasize FINN’s ability
 to reveal unknown relationships from data, thus offering itself as a process-explaining system.
 
 `Keywords:` Physics-aware neural networks · Boundary conditions · Retrospective inference · Partial differential equations · Inductive biases.
