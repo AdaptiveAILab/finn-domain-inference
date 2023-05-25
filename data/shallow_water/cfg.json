@@ -1,0 +1,21 @@
+{
+  "simulation": {
+    "timesteps": 256,
+    "width": 32, // "This also effects the resolution of the plot"
+    "height": 32,
+    "sample_interval": 1,
+    "boundary_mask": false, // "This one is not used in the code"
+    "area_scaling": 1,
+    "quantity_scaling": 1
+  },
+
+  "dataset": {
+    "samples_train": 1,
+    "samples_val": 1,
+    "samples_test": 1,
+    "name": "wave_rotation",
+    "save_data": true,
+    "visualize": true
+  }
+
+}
