@@ -1,8 +1,8 @@
 """
 This script provides a class solving the Allen-Cahn equation via numerical
 integration using scipy's solve_ivp method. It can be used to generate data
-samples of the Burger's equation with Dirichlet boundary condition on both
-sides (u = 0).
+samples of the Allen-Cahn equation with Dirichlet boundary conditions on both
+sides.
 """
 
 import numpy as np
