@@ -15,7 +15,7 @@ This repository is a combination of two complementary papers. In the first one, 
 
 
 FINN:
-https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/687e1a3e-43a9-4c2f-a81c-697c3b928892
+![](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/7bca87cb-033f-4bd2-a937-a7021e5a5d2a)
 
 
 
