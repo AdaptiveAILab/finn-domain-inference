@@ -1,0 +1,34 @@
+{
+	"paths": {
+	},
+
+	"general": {
+		"device": "cpu" // "cpu", "cuda"
+	},
+
+	"training": {
+		"save_model": false,
+		"continue_training": false,
+		"epochs": 100,
+		"learning_rate": 0.01,
+		"batch_size": 1 // 1 if batch learning, >1 if multi-batch learning
+	},
+
+	"inference": {
+		"save_model": true,
+		"continue_inference": false,
+		"noise": 0.05 // inference noise
+	},
+
+	"data": {
+		"type": "allen_cahn",  // "burger", "allen_cahn"
+		"name": "data_train",  // "data_train", "data_test"
+		"noise": 0.0 		   // training noise
+	},
+
+	"model": {
+		"name": "allen_cahn", // "burger", "allen_cahn"
+		"number": 0,  // The i-th model
+		"layer_sizes": [1, 10, 20, 10, 1] // [1, 10, 20, 10, 1] for burger and allen_cahn
+	}
+}
