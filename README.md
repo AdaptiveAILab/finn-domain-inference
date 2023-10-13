@@ -13,11 +13,15 @@ The finite volume neural network (FINN) is an exception amongst recent physics-a
 This repository is a combination of two complementary papers. In the first one, we tested FINN's ability to infer unknown boundary conditions and compared its performence with two state-of-the-art models (DISTANA and PhyDNet). A detailed explanation of the experiments and results can be found in the papers. However, we add here some videos showing the results of the models to invoke an intuitive understanding of the results. Following videos show predictions by the models inferring the BCs of the data and predicting the Burgers' equation.
 
 
-|----------------------FINN----------------------|----------------------DISTANA----------------------|----------------------PhyDNet----------------------|
+|----------------------FINN----------------------|----------------------DISTANA----------------------|----------------------PhyDNet-------------------|
 
 ![FINN](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/7bca87cb-033f-4bd2-a937-a7021e5a5d2a) -- ![DISTANA](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/10886d3a-996f-4705-ac79-c6fe41891a01) -- ![PhyDNet](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/40ac9b15-9266-4a7b-9c74-0a31d151e962)
 
+Videos show clearly that FINN's performence outperforms the other models. In this experiments, the trained models infer only $2$ BCs (i.e. $2$ learnable parameters to optimize), that are set to $[4.0, -4.0]$. Please refer to [Inferring Boundary Conditions in Finite Volume Neural Networks](https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45) for an exhaustive exploration of BC inference.
 
+After testing the BC inference ability, we tested the performence of the models inferring the physical domain alongside the boundary conditions resulting in total of $51$ learnable parameters. Interested in why $51$? Because we used an efficient retrospective inference method called [active tuning](https://arxiv.org/pdf/2010.03958.pdf). For more about the active tuning algorithm and the whole inference procees, you can check out [Physical Domain Reconstruction with Finite Volume Neural Networks]([https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45](https://doi.org/10.1080/08839514.2023.2204261)).
+
+Following are videos showing models performences in inferring masked physical domain with noisy data:
 
 
 
