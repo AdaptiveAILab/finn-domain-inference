@@ -49,18 +49,14 @@ class Simulator:
         Single sample generation using the parameters of this simulator.
         :return: The generated sample as numpy array(t, x)
         """
-
-        #=======================================================================
-        # # Initialize the simulation field
-        # if self.train_data:
-        #     u0 = (self.x**2 * np.cos(np.pi*self.x))
-        # else:
-        #     u0 = (np.sin(np.pi*self.x/2))
-        #=======================================================================
             
         # Sets the initial value the same for training and test set
-        u0 = (self.x**2 * np.cos(np.pi*self.x))
+        # Initial value for the small domain
+        # u0 = ((self.x * 2.1)**2 * np.cos(np.pi * self.x * 1.35))
 
+        # Initial value for the large domain
+        u0 = (self.x**2 * np.cos(np.pi * self.x))
+        
         nx_minus_2 = np.diag(-2*np.ones(self.Nx-2), k=0)
         nx_minus_3 = np.diag(np.ones(self.Nx-3), k=-1)
         nx_plus_3 = np.diag(np.ones(self.Nx-3), k=1)
@@ -68,10 +64,8 @@ class Simulator:
         self.lap = nx_minus_2 + nx_minus_3 + nx_plus_3
         self.lap /= self.dx**2
         # Periodic BC
-        #=======================================================================
         # self.lap[0,-1] = 1/self.dx**2
         # self.lap[-1,0] = 1/self.dx**2
-        #=======================================================================
 
         # Solve Allen-Cahn equation
         prob = solve_ivp(self.rc_ode, (0, self.T), u0, t_eval=self.t)
