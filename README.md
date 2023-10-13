@@ -10,11 +10,11 @@ The finite volume neural network (FINN) is an exception amongst recent physics-a
 
 
 ### Outline
-This repository is a combination of two complementary papers. In the first one, we tested FINN's ability to infer unknown boundary conditions and compared its performence with two state-of-the-art models (DISTANA and PhyDNet).
+This repository is a combination of two complementary papers. In the first one, we tested FINN's ability to infer unknown boundary conditions and compared its performence with two state-of-the-art models (DISTANA and PhyDNet). A detailed explanation of the experiments and results can be found in the papers. However, we add here some videos showing the results of the models to invoke an intuitive understanding of the experiments. Following videos show predictions by the models inferring the BCs of the data and predicting the Burgers' equation.
 
 
 
-
+FINN:
 https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/687e1a3e-43a9-4c2f-a81c-697c3b928892
 
 
