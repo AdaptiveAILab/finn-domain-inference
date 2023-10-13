@@ -26,7 +26,7 @@ After testing the BC inference ability, we tested the performence of the models 
 ![finn_AC_anim_gif](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/3590c424-cbcc-43f6-9613-687a607fec56)--![distana_AC_anim_gif](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/3bed129c-a020-4390-8ebc-7fa53ef458ee)--![phydnet_AC_anim_gif](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/877a8788-3039-4017-b156-980844aff5d7)
 
 
-In this set of experimentes there were in total of $51$ learnable parameters at inference. Interested in why $51$? Because we used an efficient retrospective inference method called [active tuning](https://arxiv.org/pdf/2010.03958.pdf). For more about the active tuning algorithm and the whole inference procees and how to deal with noisy data you can check out [Physical Domain Reconstruction with Finite Volume Neural Networks](https://doi.org/10.1080/08839514.2023.2204261).
+In this set of experiments there were in total of $51$ learnable parameters at inference. Interested in why $51$? Because we used an efficient retrospective inference method called [active tuning](https://arxiv.org/pdf/2010.03958.pdf). For more about the active tuning algorithm, the whole inference process and how to deal with noisy data you can check out [Physical Domain Reconstruction with Finite Volume Neural Networks](https://doi.org/10.1080/08839514.2023.2204261).
 
 
 
