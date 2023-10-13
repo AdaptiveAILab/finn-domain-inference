@@ -1,14 +1,24 @@
-# LabRotation-Horuz
-This is the repository for Coşku's lab rotation about inferring unknown boundary conditions when modeling spatio-temporal PDEs with FINN.
+# Physical Domain Reconstruction with Finite Volume Neural Networks
 
-This repository contains the PyTorch code for models, training, testing, and Python code for data generation to conduct the experiments as reported in the work [Inferring Boundary Conditions in Finite Volume Neural Networks](https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45)
+This repository contains the PyTorch code for models, training, testing, and Python code for data generation to conduct the experiments as reported in the works [Inferring Boundary Conditions in Finite Volume Neural Networks](https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45) and [Physical Domain Reconstruction with Finite Volume Neural Networks]([https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45](https://doi.org/10.1080/08839514.2023.2204261))
 
 ### Abstract
 
-When modeling physical processes in spatially confined domains, the boundaries require distinct consideration through specifying appropriate boundary conditions (BCs). The finite volume neural network (FINN) is an exception among recent physics-aware neural network models: it allows the specification of arbitrary BCs. FINN is even able to generalize to modified BCs not seen during training, but requires them to be known during prediction. However, so far even FINN was not able to handle unknown BC values. Here, we extend FINN in order to infer BC values on-the-fly. This allows us to apply FINN in situations, where the BC values, such as the inflow rate of fluid into a simulated medium, is unknown. Experiments validate FINN’s ability to not only infer the correct values, but also to model the approximated Burgers’ and Allen-Cahn equations with higher accuracy compared to competitive pure ML and physics-aware ML models. Moreover, FINN generalizes well beyond the BC value range encountered during training, even when trained on only one fixed set of BC values. Our findings emphasize FINN’s ability
-to reveal unknown relationships from data, thus offering itself as a process-explaining system.
+The finite volume neural network (FINN) is an exception amongst recent physics-aware neural network models as it allows the specification of arbitrary boundary conditions (BCs). FINN can generalize and adapt to various prescribed BC values not provided during training, where other models fail. However, FINN depends on explicitly given BC values and cannot deal with unobserved parts within the physical domain. To overcome these limitations, we extend FINN in two ways. First, we integrate the capability to infer BC values on-the-fly from just a few data points. This allows us to apply FINN in situations, where the BC values, such as the inflow rate of fluid into a simulated medium, is unknown. Second, we extend FINN to plausibly reconstruct missing data within the physical domain via a gradient-driven spin-up phase. Our experiments validate that FINN reliably infers correct BCs, but also generates smooth and plausible full-domain reconstructions that are consistent with the observable data. Moreover, FINN can generate precise predictions orders of magnitude more accurate compared to competitive pure ML and physics-aware ML models---even when the physical domain is only partially visible, and the BCs are applied at a point that is spatially distant from the observable volumes.
 
 `Keywords:` Physics-aware neural networks · Boundary conditions · Retrospective inference · Partial differential equations · Inductive biases.
+
+
+### Outline
+This repository is a combination of two complementary papers. In the first one, we tested FINN's ability to infer unknown boundary conditions and compared its performence with two state-of-the-art models (DISTANA and PhyDNet).
+
+
+
+
+https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/687e1a3e-43a9-4c2f-a81c-697c3b928892
+
+
+
 
 If you find this repository helpful, please cite our work:
 
