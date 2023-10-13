@@ -1,9 +1,10 @@
 """
-This script creates a certain amount of data using Allen-Cahn's equation.
+This script creates data using Allen-Cahn's equation.
 """
 
 import numpy as np
 import os
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -15,7 +16,7 @@ from simulator import Simulator
 # PARAMETERS #
 ##############
 
-TRAIN_DATA = True
+TRAIN_DATA = False
 MINI_BATCHES = False
 
 #
@@ -25,20 +26,20 @@ DIFFUSION_COEFFICIENT = 0.05
 if TRAIN_DATA:
     T_MAX = 2
     T_STEPS = 256
-    LEFT_BC = -6.0
-    RIGHT_BC = 6.0
+    LEFT_BC = 0.0
+    RIGHT_BC = 0.0
     print("This is training data")
 else:
     T_MAX = 1
     T_STEPS = 128
-    LEFT_BC = -1.5 #np.random.uniform(-0.3,0.3)
-    RIGHT_BC = 1.5 #np.random.uniform(-0.3,0.3)
+    LEFT_BC = -1.0 #np.random.uniform(-0.3,0.3)
+    RIGHT_BC = 1.0 #np.random.uniform(-0.3,0.3)
     print(LEFT_BC)
     print(RIGHT_BC)
 
     
-X_LEFT = -1
-X_RIGHT = 1
+X_LEFT = -1.0
+X_RIGHT = 1.0
 X_STEPS = 51
 
 #
@@ -325,52 +326,93 @@ def visualize_sample(sample, simulator, idcs_init=None, idcs_bound=None):
     :param idcs_bound: The indices of the boundary points
     """
 
-    sample = np.transpose(sample)
-
-    fig, ax = plt.subplots(1, 2, figsize=(10, 4))
-
-    # u(t, x) over space
-    h = ax[0].imshow(sample, interpolation='nearest', cmap='rainbow', 
-                  extent=[simulator.t.min(), simulator.t.max(),
-                          simulator.x.min(), simulator.x.max()],
+    ### This part saves the plot of the data ###
+    # u(t, x) over time and space
+    fig, ax = plt.subplots()
+     
+    h = ax.imshow(np.flip(sample, 0), interpolation='nearest',
+                  extent=[simulator.x.min(), simulator.x.max(),
+                          simulator.t.min(), simulator.t.max()],
                   origin='upper', aspect='auto')
-    divider = make_axes_locatable(ax[0])
-    cax = divider.append_axes("right", size="5%", pad=0.05)
-    fig.colorbar(h, cax=cax)
-    
-    if TRAIN_DATA:
-        coords_init = simulator.x[idcs_init[:, 1]]
-        coords_bound = simulator.t[idcs_bound[:, 0]]
-        
-        ax[0].plot(np.zeros(len(coords_init)), coords_init, "kx", label="Data",
-                   markersize=4, clip_on=False)
-        ax[0].plot(coords_bound, np.ones(len(coords_bound)) * simulator.x.min(), "kx",
-                   markersize=4, clip_on=False)
-        ax[0].plot(coords_bound, np.ones(len(coords_bound)) * simulator.x.max(), "kx",
-                   markersize=4, clip_on=False)
-        
-    ax[0].set_xlim(0, simulator.t.max())
-    ax[0].set_ylim(simulator.x.min(), simulator.x.max())
-    ax[0].legend(loc="upper right")
-    ax[0].set_xlabel('$t$')
-    ax[0].set_ylabel('$x$')
-    ax[0].set_title('$u(t,x)$', fontsize = 10)
-    
-    # u(t, x) over time
-    line, = ax[1].plot(simulator.x, sample[:, 0], 'b-', linewidth=2, label='Exact')
-    ax[1].set_xlabel('$x$')
-    ax[1].set_ylabel('$u(t,x)$')    
-    ax[1].set_xlim([simulator.x.min(), simulator.x.max()])
-    ax[1].set_ylim([-1.1, 1.1])
-
-    anim = animation.FuncAnimation(fig,
-                                   animate,
-                                   frames=len(simulator.t),
-                                   fargs=(line, sample),
-                                   interval=20)
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad=0.1)
+    cbar = fig.colorbar(h, cax=cax, ticks=[-0.96, -0.4, 0, 0.4, 0.76])
+    cbar.ax.set_yticklabels(['-0.96', '-0.4', '0', '0.4', '0.76'], fontsize=12)
+     
+    ax.set_ylim(simulator.t.min(), simulator.t.max())
+    ax.set_xlim(simulator.x.min(), simulator.x.max())
+    ax.set_xticks([simulator.x.min(), -0.5, 0, 0.5, simulator.x.max()])
+    ax.set_xticklabels(([f'{simulator.x.min()}', '-0.5', '0', '0.5', f'{simulator.x.max()}']), fontsize=14)
+    ax.set_yticks([simulator.t.min(), 0.25, 0.5, 0.75, simulator.t.max()])
+    ax.set_yticklabels([f'{simulator.t.min()}', '0.25', '0.5', '0.75', f'{simulator.t.max()}'], fontsize=14)
+    ax.set_ylabel('$t$', size=22)
+    ax.set_xlabel('$x$', size=22)
+     
     plt.tight_layout()
     plt.draw()
     plt.show()
+    # plt.savefig(f"allen_cahn_space.pdf")
+
+    # u(t,x) at one specific t
+    matplotlib.rc('xtick', labelsize=16)
+    matplotlib.rc('ytick', labelsize=16)
+
+    fig, ax = plt.subplots(sharex=True, figsize=(6, 4))
+
+    ax.plot(simulator.x, sample[0,:], 'ro', linewidth=2.0)  # , label='Exact')
+    ax.set_xlabel('$x$', fontsize=24)
+    ax.set_ylabel(f'$u(x, t={int(simulator.t.min())})$', fontsize=24)
+    # ax.set_xlim([simulator.x.min(), simulator.x.max()])
+    # ax.set_ylim([-1.2, 1.2])
+    # ax.set_xticks([simulator.x.min(), 0, simulator.x.max()])
+    ax.set_yticks([-1.0, -0.5, 0.0, 0.5, 1.0])
+    # ax.legend(loc="upper left", fontsize=16)
+    ax.grid(True, linewidth=0.3)
+    cut_domain_size = 10
+    ax.axvline(x=simulator.x[cut_domain_size], color='saddlebrown', linewidth=2.5)
+    ax.axvline(x=simulator.x[-cut_domain_size - 1], color='saddlebrown', linewidth=2.5)
+
+    plt.tight_layout()
+    plt.draw()
+    plt.show()
+    # plt.savefig(f"allen_cahn_time.pdf")
+
+    #u(t, x) over space at a specific time unit
+    matplotlib.rc('xtick', labelsize=16) 
+    matplotlib.rc('ytick', labelsize=16) 
+    
+    fig, ax = plt.subplots()
+
+    # Add noise to the data if you want to
+    # sample[:80] = sample[:80] + np.random.normal(np.zeros_like(sample[:80]),
+    #                                                 np.ones_like(sample[:80]) * 0.05)
+    sample = np.transpose(sample)
+    
+    line1, = ax.plot(simulator.x, sample[:, 0], 'ro', linewidth=2, label='Exact')
+    ax.set_xlabel('$x$', size=22)
+    ax.set_ylabel('$u(t,x)$', size=22)
+    ax.set_xlim([simulator.x.min(), simulator.x.max()])
+    ax.set_yticks([-1.0, -0.5, 0.0, 0.5, 1.0])
+    ax.set_xticks([-1.0, -0.5, 0.0, 0.5, 1.0])
+    ax.grid(True, linewidth=0.3)
+    cut_domain_size = 10
+    ax.axvline(x=simulator.x[cut_domain_size], color='saddlebrown', linewidth=2.5)
+    ax.axvline(x=simulator.x[-cut_domain_size - 1], color='saddlebrown', linewidth=2.5)
+    ax.set_ylim([-1.15, 1.0])
+    
+    anim = animation.FuncAnimation(fig,
+                                   animate,
+                                   frames=len(simulator.t),
+                                   fargs=(line1, sample),
+                                   interval=20)
+      
+    plt.tight_layout()
+    plt.draw()
+    plt.show()
+
+    # f = f"alleb_cahn-animation.mp4"
+    # writervideo = animation.FFMpegWriter(fps=60)
+    # anim.save(f, writer=writervideo)
 
 
 def animate(t, axis, field):
@@ -454,6 +496,9 @@ def main():
         name = "right_BC.npy"
         data_path = os.path.join(root_path, DATASET_NAME+"_train")
         np.save(file=os.path.join(data_path, name), arr=save_right_BC)
+
+        print(f'Left BCs:  {save_left_BC}')
+        print(f'Right BCs: {save_right_BC}')
 
 
 if __name__ == "__main__":
