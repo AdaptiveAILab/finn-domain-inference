@@ -48,17 +48,15 @@ If you find this repository helpful, please cite our works:
 
 ```
 @article{Horuz2023,
-author = {Coşku Can Horuz and Matthias Karlbauer and Timothy Praditia and Martin V. Butz and Sergey Oladyshkin and Wolfgang Nowak and Sebastian Otte},
-title = {Physical Domain Reconstruction with Finite Volume Neural Networks},
-journal = {Applied Artificial Intelligence},
-volume = {37},
-number = {1},
-pages = {2204261},
-year  = {2023},
-publisher = {Taylor & Francis},
-doi = {10.1080/08839514.2023.2204261},
-URL = {https://doi.org/10.1080/08839514.2023.2204261},
-eprint = {https://doi.org/10.1080/08839514.2023.2204261}
+    author = {Coşku Can Horuz and Matthias Karlbauer and Timothy Praditia and Martin V. Butz and Sergey Oladyshkin and Wolfgang Nowak and Sebastian Otte},
+    title = {Physical Domain Reconstruction with Finite Volume Neural Networks},
+    journal = {Applied Artificial Intelligence},
+    volume = {37},
+    number = {1},
+    pages = {2204261},
+    year  = {2023},
+    publisher = {Taylor & Francis},
+    doi = {10.1080/08839514.2023.2204261}
 }
 ```
 
