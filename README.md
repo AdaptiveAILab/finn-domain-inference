@@ -19,7 +19,7 @@ This repository is a combination of two complementary papers. In the first one, 
 
 Videos show clearly that FINN's performence outperforms the other models. In this experiments, the trained models infer only $2$ BCs (i.e. $2$ learnable parameters to optimize), that are set to $[4.0, -4.0]$. Please refer to [Inferring Boundary Conditions in Finite Volume Neural Networks](https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45) for an exhaustive exploration of BC inference.
 
-After testing the BC inference ability, we tested the performence of the models inferring the physical domain alongside the boundary conditions. Following are videos showing models inferring masked physical domain with noisy data:
+After testing the BC inference ability, we tested the performence of the models inferring the masked physical domain alongside the boundary conditions. Following are videos showing models inferring masked physical domain with noisy data:
 
 |--FINN--|--DISTANA--|--PhyDNet--|
 
