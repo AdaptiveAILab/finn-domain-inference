@@ -1,0 +1,53 @@
+{
+	"paths": {
+	},
+
+	"general": {
+		"device": "cpu" // "cpu", "cuda"
+	},
+
+	"training": {
+		"save_model": false,
+		"continue_training": false,
+		"epochs": 100,
+		"batch_size": 1, // 1 if batch learning, >1 if multi-batch learning
+		"learning_rate": 0.01,
+		"t_start": 0,
+		"t_stop": 100  // burger 100/200, allen_cahn 100/200
+	},
+
+	"validation": {
+		"batch_size": 1,
+		"t_start": 100,  // burger 100/200, allen_cahn 100/200
+		"t_stop": 128  // burger 128/256, allen_cahn 128/256
+	},
+
+	"testing": {
+		"batch_size": 1,
+		"teacher_forcing_steps": 20,
+		"closed_loop_steps": 1990
+	},
+
+	"inference": {
+		"save_model": true,
+		"continue_inference": false,
+		"noise": 0.05 // inference noise
+	},
+
+	"data": {
+		"type": "allen_cahn",  // "burger", "allen_cahn"  // "burger", "allen_cahn"
+		"name": "data_train",  // "data_train", "data_test"
+		"noise": 0.0 		   // training noise
+	},
+
+	"model": {
+		"name": "allen_cahn",  // "burger", "allen_cahn"
+		"number": 0,  // i-th trained model
+		"field_size": [49],  // burger [49], allen_cahn [49]
+		"dynamic_channels": [1],  // burger [1], allen_cahn [1]
+		"lateral_channels": [1],
+		"hidden_channels": [16],
+		"kernel_size": 3,
+		"lateral_size": 1
+	}
+}
