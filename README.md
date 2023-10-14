@@ -33,7 +33,7 @@ If you find this repository helpful, please cite our works:
 
 ```
 @InProceedings{Horuz2022,
-    author    = {Coşku Can {Horuz} and Matthias Karlbauer and Timothy Praditia and Martin V. Butz and Sergey Oladyshkin and Wolfgang Nowak and Sebastian Otte},
+    author    = {Coşku Can Horuz and Matthias Karlbauer and Timothy Praditia and Martin V. Butz and Sergey Oladyshkin and Wolfgang Nowak and Sebastian Otte},
     booktitle = {International Conference on Artificial Neural Networks (ICANN)},
     title     = {Inferring Boundary Conditions in Finite Volume Neural Networks},
     year      = {2022},
