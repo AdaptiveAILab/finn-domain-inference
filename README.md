@@ -8,11 +8,10 @@ The finite volume neural network (FINN) is an exception amongst recent physics-a
 
 `Keywords:` Physics-aware neural networks · Boundary conditions · Retrospective inference · Partial differential equations · Inductive biases
 
-
 ### Outline
 This repository is a combination of two complementary papers. In the first one, we tested FINN's ability to infer unknown boundary conditions and compared its performence with two state-of-the-art models (DISTANA and PhyDNet). A detailed explanation of the experiments and results can be found in the papers. However, we add here some videos showing the results of the models to invoke an intuitive understanding of the results. Following videos show predictions by the models inferring the BCs of the data and predicting the Burgers' equation.
 
-| ![FINN](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/7bca87cb-033f-4bd2-a937-a7021e5a5d2a) | ![DISTANA](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/10886d3a-996f-4705-ac79-c6fe41891a01) | ![PhyDNet!](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/40ac9b15-9266-4a7b-9c74-0a31d151e962) |
+| ![finn](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/602fbefc-d02a-4540-afaf-7599563b68bf) | ![distana](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/038cb93d-aa64-40a1-b9d7-0e24d1804585) | ![phydnet](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/7ced960b-e375-48f2-825c-0ca47592b90c) |
 |:--:|:--:|:--:| 
 | *FINN* | *DISTANA* | *PhyDNet* |
 
@@ -20,7 +19,7 @@ Videos show clearly that FINN's performence outperforms the other models. In thi
 
 After testing the BC inference ability, we tested the performence of the models inferring the masked physical domain alongside the boundary conditions. Following are videos showing models inferring masked physical domain and boundary conditions with noisy data:
 
-| ![finn_AC_anim_gif](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/3590c424-cbcc-43f6-9613-687a607fec56) | ![distana_AC_anim_gif](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/3bed129c-a020-4390-8ebc-7fa53ef458ee) | ![phydnet_AC_anim_gif](https://github.com/CognitiveModeling/MSC-Horuz/assets/94513279/877a8788-3039-4017-b156-980844aff5d7) |
+| ![finn_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/7a852154-d225-4350-b8cd-042dc940b45f) | ![distana_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/9f7efc17-5c11-4332-9f6f-dbe9e79d8e8b) | ![phydnet_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/57584f43-c8e1-4754-89d9-ac081e16c7ae) |
 |:--:|:--:|:--:| 
 | *FINN* | *DISTANA* | *PhyDNet* |
 
