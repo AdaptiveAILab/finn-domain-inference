@@ -1,6 +1,6 @@
 # Physical Domain Reconstruction with Finite Volume Neural Networks
 
-This repository contains the PyTorch code for models, training, testing, and Python code for data generation to conduct the experiments as reported in the works [Inferring Boundary Conditions in Finite Volume Neural Networks](https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45) and [Physical Domain Reconstruction with Finite Volume Neural Networks](https://doi.org/10.1080/08839514.2023.2204261)
+This repository contains the PyTorch code for models, training, testing, and Python code for data generation to conduct the experiments as reported in the works [Inferring Boundary Conditions in Finite Volume Neural Networks](https://link.springer.com/chapter/10.1007/978-3-031-15919-0_45) and [Physical Domain Reconstruction with Finite Volume Neural Networks](https://doi.org/10.1080/08839514.2023.2204261).
 
 ### Abstract
 
