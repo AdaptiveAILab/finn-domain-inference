@@ -12,7 +12,9 @@ The finite volume neural network (FINN) is an exception amongst recent physics-a
 This repository is a combination of two complementary papers. In the first one, we tested FINN's ability to infer unknown boundary conditions and compared its performence with two state-of-the-art models (DISTANA and PhyDNet). A detailed explanation of the experiments and results can be found in the papers. However, we add here some videos showing the results of the models to invoke an intuitive understanding of the results. Following videos show predictions by the models inferring the BCs of the data and predicting the Burgers' equation.
 
 | ![finn](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/0a730c3d-da77-4e6d-9916-4950ebddff7e)
- | ![distana](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/038cb93d-aa64-40a1-b9d7-0e24d1804585) | ![phydnet](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/7ced960b-e375-48f2-825c-0ca47592b90c) |
+ | ![distana](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/f21ec7ce-d715-4790-b159-fb5c199546b5)
+ | ![phydnet](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/5323757e-8815-463b-ae77-baa82dd929b7)
+ |
 |:--:|:--:|:--:| 
 | *FINN* | *DISTANA* | *PhyDNet* |
 
@@ -20,7 +22,10 @@ Videos show clearly that FINN's performence outperforms the other models. In thi
 
 After testing the BC inference ability, we tested the performence of the models inferring the masked physical domain alongside the boundary conditions. Following are videos showing models inferring masked physical domain and boundary conditions with noisy data:
 
-| ![finn_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/7a852154-d225-4350-b8cd-042dc940b45f) | ![distana_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/9f7efc17-5c11-4332-9f6f-dbe9e79d8e8b) | ![phydnet_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/3898842/57584f43-c8e1-4754-89d9-ac081e16c7ae) |
+| ![finn_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/3c06b0ed-c1db-4432-86d2-2e663397630f)
+ | ![distana_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/c49945a4-bc36-46a9-8f71-b546b8b78e7c)
+ | ![phydnet_AC](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/54774529-b654-4e20-9363-b009e1e9ebb5)
+ |
 |:--:|:--:|:--:| 
 | *FINN* | *DISTANA* | *PhyDNet* |
 
