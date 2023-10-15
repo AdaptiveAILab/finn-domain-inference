@@ -12,9 +12,9 @@ The finite volume neural network (FINN) is an exception amongst recent physics-a
 This repository is a combination of two complementary papers. In the first one, we tested FINN's ability to infer unknown boundary conditions and compared its performence with two state-of-the-art models (DISTANA and PhyDNet). A detailed explanation of the experiments and results can be found in the papers. However, we add here some videos showing the results of the models to invoke an intuitive understanding of the results. Following videos show predictions by the models inferring the BCs of the data and predicting the Burgers' equation.
 
 | ![finn](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/0a730c3d-da77-4e6d-9916-4950ebddff7e)
- | ![distana](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/f21ec7ce-d715-4790-b159-fb5c199546b5)
- | ![phydnet](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/5323757e-8815-463b-ae77-baa82dd929b7)
- |
+| ![distana](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/f21ec7ce-d715-4790-b159-fb5c199546b5)
+| ![phydnet](https://github.com/AdaptiveAILab/finn-domain-inference/assets/94513279/5323757e-8815-463b-ae77-baa82dd929b7)
+|
 |:--:|:--:|:--:| 
 | *FINN* | *DISTANA* | *PhyDNet* |
 
